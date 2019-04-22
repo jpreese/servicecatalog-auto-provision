@@ -1,0 +1,63 @@
+apiVersion: metacontroller.k8s.io/v1alpha1
+kind: CompositeController
+metadata:
+  name: statefulmeshservice-controller
+spec:
+  generateSelector: true
+  parentResource:
+    apiVersion: k2.com/v1
+    resource: statefulmeshservices
+  childResources:
+  - apiVersion: v1
+    resource: namespaces
+    updateStrategy:
+      method: Recreate
+  - apiVersion: servicecatalog.k8s.io/v1beta1
+    resource: serviceinstances
+  - apiVersion: servicecatalog.k8s.io/v1beta1
+    resource: servicebindings
+  - apiVersion: apps/v1
+    resource: deployments
+    updateStrategy:
+      method: Recreate
+  - apiVersion: v1
+    resource: services
+    updateStrategy:
+      method: Recreate
+  - apiVersion: networking.istio.io/v1alpha3
+    resource: virtualservices
+    updateStrategy:
+      method: Recreate
+  hooks:
+    sync:
+      webhook:
+        url: http://statefulmeshservice-controller.metacontroller/sync
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: statefulmeshservice-controller
+  namespace: metacontroller
+spec:
+  selector:
+    app: statefulmeshservice-controller
+  ports:
+  - port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: statefulmeshservice-controller
+  namespace: metacontroller
+spec:
+  selector:
+    matchLabels:
+      app: statefulmeshservice-controller
+  template:
+    metadata:
+      labels:
+        app: statefulmeshservice-controller
+    spec:
+      containers:
+      - name: statefulmeshservice-controller
+        image: statefulmeshservice-controller:v1

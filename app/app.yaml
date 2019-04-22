@@ -1,0 +1,17 @@
+apiVersion: k2.com/v1
+kind: StatefulMeshService
+metadata:
+  name: sentence
+spec:
+  name: sentence
+  image: sentence
+
+  # these values come from the classes and plans that are available on the cluster
+  # since we've installed minibroker on the cluster, we have a few classes available to us
+  # (e.g. mysql, postgres, redis)
+  volumeclass: mysql
+
+  # the plan also comes from the minibroker broker that resides on the cluster
+  # in this case, the plan describes the version of the mysql database but could
+  # really be however we decide to classify it (size, performance, etc)
+  volumeplan: 5-7-14
